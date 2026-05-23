@@ -1,39 +1,56 @@
 # Proyecto de Analítica de Datos y Modelo Predictivo — Cambio Climático Colombia
 
-Análisis integral del sistema ENSO (El Niño / La Niña) entre 1950 y 2026, aplicando
-un flujo ETL → EDA → Dashboard de BI → Modelos predictivos supervisados,
-con énfasis en el impacto del fenómeno sobre Colombia.
+Análisis del fenómeno ENOS (El Niño / La Niña) y su relación con variables climatológicas,
+eventos de salud pública y desastres en Colombia (2007–2025), aplicando un flujo
+ETL → EDA → Dashboard de BI → Modelos predictivos supervisados.
 
 ---
 
 ## Dataset
 
-- **Nombre:** `Cambio climatico`
-- **Fuente:** [Indicador de Cambio Climático — datos.gov.co (IDEAM)](https://www.datos.gov.co/dataset/Cambio-clim-tico/bgt6-7zyr/about_data)
-- **Registros:** 916 registros mensuales (1950–2026), 914 tras limpieza
-- **Variables:** 17 columnas tras transformación (temperatura, anomalías, fase, intensidad, duración y variables derivadas)
-
+- **Nombre:** Cambio climático
+- **Fuente:** [Indicador de Cambio Climático — datos.gov.co (IDEAM / Ministerio de Salud)](https://www.datos.gov.co/dataset/Cambio-clim-tico/bgt6-7zyr/about_data)
+- **Última actualización:** 6 de abril de 2026
+- **Registros:** 228 registros mensuales (2007–2025), 204 con datos completos de salud (desde 2009)
+- **Variables:** 33 columnas 
+- 
 ## Diccionario de variables
 
 | Campo | Descripción | Unidad |
 |---|---|---|
 | `Fecha` | Fecha mensual del registro | YYYY-MM-DD |
 | `Anio` | Año del registro | YYYY |
-| `Mes` | Mes del registro (1–12) | Número |
+| `Mes_Nombre` | Mes abreviado en español | Texto |
 | `Trimestre` | Trimestre del año (1–4) | Número |
-| `Decada` | Década del registro (1950s–2020s) | Texto |
-| `Temperatura_Pacifico_C` | Temperatura superficial del mar en la región Niño 3.4 del Pacífico ecuatorial | °C |
-| `Temperatura_Base_C` | Temperatura climatológica de referencia mensual (línea base histórica) | °C |
-| `Anomalia_C` | Desviación mensual respecto a la temperatura base | °C |
-| `ONI_C` | Índice ONI — promedio hacia adelante de 3 meses consecutivos de `Anomalia_C` | °C |
-| `ONI_Round` | Índice ONI redondeado a 1 decimal | °C |
-| `Anomalia_12m` | Promedio móvil de 12 meses de la anomalía mensual | °C |
-| `Anomalia_Delta` | Cambio mensual de la anomalía respecto al mes anterior | °C |
-| `Fase_ONI` | Fase ENSO según el ONI trimestral: El Nino / La Nina / Neutral | Texto |
-| `Fase_Evento` | Fase ENSO del evento activo en ese mes | Texto |
-| `Intensidad_Evento` | Clasificación NOAA: Débil / Moderado / Fuerte / Muy Fuerte / Neutral | Texto |
-| `Duracion_Meses` | Meses consecutivos del evento activo en la misma fase | Meses |
-| `Evento_Extremo` | Indicador binario: 1 si \|ONI_C\| ≥ 1.5°C | 0/1 |
+| `Decada` | Década del registro (2000s–2020s) | Texto |
+| `Num_Mes_Serie` | Número secuencial del mes desde el inicio de la serie | Número |
+| `Fase_ENOS` | Fase ENSO del mes: El Nino / La Nina / Neutral | Texto |
+| `ENOS_Indice` | Índice ENOS numérico (anomalía temperatura Pacífico) | °C |
+| `Clasificacion_ONI` | Clasificación textual del ONI (NIÑA DÉBIL, NIÑO FUERTE, etc.) | Texto |
+| `Intensidad_ENOS` | Clasificación NOAA: Débil / Moderado / Fuerte / Muy Fuerte / Neutral | Texto |
+| `Evento_Extremo` | Indicador binario: 1 si \|ENOS_Indice\| ≥ 1.5°C | 0/1 |
+| `Temperatura_Max_C` | Temperatura máxima mensual registrada | °C |
+| `Temperatura_Min_C` | Temperatura mínima mensual registrada | °C |
+| `Temperatura_Prom_C` | Temperatura promedio mensual | °C |
+| `Temperatura_Prom_12m` | Promedio móvil de 12 meses de la temperatura promedio | °C |
+| `Temperatura_Delta` | Variación mensual de la temperatura promedio | °C |
+| `Lluvia_Acumulada_mm` | Precipitación acumulada mensual | mm |
+| `Lluvia_12m` | Promedio móvil de 12 meses de la lluvia acumulada | mm |
+| `Lluvia_Delta` | Variación mensual de la precipitación | mm |
+| `Temporada` | Temporada climática: Lluvioso / Menos lluvioso | Texto |
+| `Casos_Dengue` | Casos de dengue reportados en el mes | Número |
+| `Dengue_Delta` | Variación mensual de casos de dengue | Número |
+| `Casos_Leptospirosis` | Casos de leptospirosis reportados | Número |
+| `Casos_Respiratorios` | Casos de enfermedades respiratorias (ESI + IRAG) | Número |
+| `Eventos_FRM` | Fenómenos de Remoción en Masa (deslizamientos, avalanchas) | Número |
+| `Familias_Afectadas` | Familias afectadas por eventos climáticos | Número |
+| `Inundaciones` | Número de eventos de inundación | Número |
+| `Encharcamientos` | Número de eventos de encharcamiento | Número |
+| `Damnificados_Inundaciones` | Personas damnificadas por inundaciones | Número |
+| `Damnificados_Encharcamientos` | Personas damnificadas por encharcamientos | Número |
+| `Total_Afectados` | Suma de damnificados por inundaciones y encharcamientos | Número |
+| `Datos_Completos` | 1 si el registro tiene todos los indicadores (2009+), 0 si es parcial (2007–2008) | 0/1 |
+| `Clave_Anio_Mes` | Clave año-mes concatenada (ej. 2009Ene) | Texto |
 
 ---
 
@@ -50,19 +67,20 @@ con énfasis en el impacto del fenómeno sobre Colombia.
 
 ## Descripción del proyecto
 
-El dataset contiene 914 registros mensuales del sistema ENSO entre 1950 y 2026,
-con variables como temperatura del Pacífico, anomalía térmica, índice ONI, fase del evento,
-intensidad y duración. A partir de ellos se construye una solución analítica que cubre
-limpieza de datos, análisis exploratorio, modelo de BI y modelado predictivo supervisado.
+El dataset contiene 228 registros mensuales (2007–2025) que cruzan el comportamiento del
+fenómeno ENOS con temperatura local, precipitación, casos de dengue, leptospirosis,
+enfermedades respiratorias y eventos de desastre en Colombia. A partir de ellos se construye
+una solución analítica completa que cubre limpieza de datos, análisis exploratorio,
+modelo de BI y modelado predictivo supervisado.
 
 ---
 
 ## Objetivos
 
-Desarrollar un proyecto integral sobre el sistema ENSO con énfasis en su impacto en Colombia:
+Desarrollar un proyecto integral sobre cambio climático y salud pública en Colombia:
 
 - Datos limpios y transformados listos para análisis.
-- Dashboard de BI con KPIs e insights sobre el ciclo ENSO.
+- Dashboard de BI con KPIs e insights sobre ENOS, clima y salud.
 - Modelos supervisados evaluados con métricas de desempeño.
 - Conclusiones y recomendaciones basadas en evidencia.
 
@@ -88,30 +106,27 @@ Cambio_climatico_CO/
 │
 ├── data/
 │   ├── raw/
-│   │   └── Cambio_climatico.csv          # Dataset crudo ENSO (916 registros)
+│   │   └── cambioclimatico.csv               # Dataset crudo (228 registros, 2007–2025)
 │   ├── cleaned/
-│   │   └── enso_cleaned.csv              # Dataset limpio (914 filas, 8 cols)
+│   │   └── cambioclimatico_cleaned.csv       # Dataset limpio (228 filas, 20 cols)
 │   └── processed/
-│       └── enso_model_ready.csv          # Dataset con variables derivadas (914 filas, 17 cols)
+│       └── cambioclimatico_model_ready.csv   # Dataset con variables derivadas (228 filas, 33 cols)
 │
 ├── notebooks/
-│   ├── 01_etl.ipynb                      #  limpieza y transformación 
-│   ├── 02_eda.ipynb                      #  análisis exploratorio 
-│   ├── 03_modelos_pred.ipynb             # modelos predictivos 
+│   ├── 03_etl_cambioclimatico.ipynb          # Extracción, transformación y carga
+│   └── 04_eda_cambioclimatico.ipynb          # Análisis exploratorio de datos
 │
 ├── reports/
-│   ├── eda_01_distribuciones.png
-│   ├── eda_02_boxplots_fase.png
-│   ├── eda_03_categoricas.png
-│   ├── eda_04_serie_temporal.png
-│   ├── eda_05_intensidad_decada.png
-│   ├── eda_06_estacionalidad.png
-│   ├── eda_07_correlaciones.png
-│   ├── eda_08_scatter.png
-│   ├── eda_09_episodios_colombia.png
-│   └── eda_10_temperatura_anual.png
-│   └── eda_11_duracion_intensidad.png
-│   └── eda_12_delta.png
+│   ├── eda_cc_01_distribuciones.png          # Distribuciones de variables numéricas
+│   ├── eda_cc_02_boxplots_fase.png           # Variables por fase ENOS
+│   ├── eda_cc_03_categoricas.png             # Frecuencia de variables categóricas
+│   ├── eda_cc_04_serie_temporal.png          # Evolución temporal 2007–2025
+│   ├── eda_cc_05_anuales.png                 # Indicadores anuales
+│   ├── eda_cc_06_estacionalidad.png          # Estacionalidad mensual
+│   ├── eda_cc_07_correlaciones.png           # Matriz de correlaciones
+│   ├── eda_cc_08_scatter.png                 # Relaciones entre variables clave
+│   ├── eda_cc_09_episodios.png               # Episodios ENOS críticos
+│   └── eda_cc_10_desastres.png               # Impacto social por temporada y fase
 │
 ├── requirements.txt
 └── README.md
@@ -119,61 +134,70 @@ Cambio_climatico_CO/
 
 ---
 
-## Fase 1 - ETL: extracción, transformación y carga 
+## Fase 1 — ETL: extracción, transformación y carga
 
-Se trabajó con el archivo crudo `data/raw/Cambio_climatico.csv`, que contiene
-916 registros mensuales de temperaturas y anomalías del Pacífico ecuatorial entre
-1950 y 2026, publicado por el IDEAM en datos.gov.co.
+Se trabajó con el archivo crudo `data/raw/cambioclimatico.csv`, que contiene 228 registros
+mensuales de variables climáticas, indicadores de salud pública y eventos de desastre
+entre 2007 y 2025, publicado por el IDEAM y el Ministerio de Salud en datos.gov.co.
 
 El trabajo de esta fase se concentró en dejar una base confiable para el análisis.
-Se renombraron columnas al español, se estandarizaron las categorías de fase ENSO,
-se eliminaron 2 registros con ONI incompleto (marzo y abril 2026, cuyos meses futuros
-no existen aún) y se construyeron 9 variables derivadas clave.
+Se corrigió la codificación de caracteres especiales (ñ en valores de fase ENOS),
+se convirtieron columnas numéricas almacenadas con coma decimal, se conservaron las
+24 filas de 2007–2008 con indicador de completitud, y se construyeron 10 variables
+derivadas clave.
 
 | Variable derivada | Descripción |
 |---|---|
-| `Anio`, `Mes`, `Trimestre`, `Decada` | Componentes temporales extraídos de la fecha |
-| `Intensidad_Evento` | Clasificación NOAA por magnitud del ONI trimestral |
-| `Duracion_Meses` | Meses consecutivos del evento activo en la misma fase |
-| `Evento_Extremo` | 1 si \|ONI_C\| ≥ 1.5°C |
-| `Anomalia_12m` | Promedio móvil de 12 meses de la anomalía |
-| `Anomalia_Delta` | Cambio mensual de la anomalía |
+| `Trimestre`, `Decada` | Componentes temporales adicionales |
+| `Intensidad_ENOS` | Clasificación NOAA: Débil / Moderado / Fuerte / Muy Fuerte |
+| `Evento_Extremo` | 1 si \|ENOS_Indice\| ≥ 1.5°C |
+| `Temperatura_Prom_12m` | Promedio móvil de 12 meses de la temperatura |
+| `Lluvia_12m` | Promedio móvil de 12 meses de la precipitación |
+| `Temperatura_Delta` | Variación mensual de temperatura |
+| `Lluvia_Delta` | Variación mensual de precipitación |
+| `Dengue_Delta` | Variación mensual de casos de dengue |
+| `Total_Afectados` | Suma de damnificados por inundaciones y encharcamientos |
+| `Datos_Completos` | Indicador binario de completitud del registro |
 
-> **Decisión metodológica:** la intensidad del evento se clasifica con el **ONI trimestral**
-> (`ONI_C`), no con la anomalía mensual puntual, conforme al estándar internacional de la NOAA.
+> **Decisión metodológica:** los registros de 2007–2008 se conservan porque contienen
+> datos válidos de temperatura, fase ENOS y desastres, aunque carezcan de indicadores
+> de salud. La columna `Datos_Completos` permite filtrar el subconjunto completo cuando
+> se requiera.
 
-**Resultado:** `enso_cleaned.csv` (914 filas, 8 columnas) y `enso_model_ready.csv` (914 filas, 17 columnas).
+**Resultado:** `cambioclimatico_cleaned.csv` (228 filas, 20 columnas) y `cambioclimatico_model_ready.csv` (228 filas, 33 columnas).
 
 ---
 
-## Fase 2 - EDA: análisis exploratorio de datos 
+## Fase 2 — EDA: análisis exploratorio de datos
 
 Se tomó el dataset procesado y se realizó una exploración en 14 secciones para
-entender el comportamiento del sistema ENSO y su relación con Colombia.
-Se revisaron distribuciones, boxplots por fase, tendencias por década, estacionalidad
-mensual, correlaciones y los episodios históricos más críticos.
+entender el comportamiento del ENOS, las variables climáticas y su relación con la
+salud pública y los desastres en Colombia. Se revisaron distribuciones, boxplots por
+fase, series temporales, estacionalidad mensual, correlaciones y los episodios
+históricos más críticos del periodo 2009–2025.
 
 ### Hallazgos principales del EDA
 
-1. Los eventos de El Niño se han **intensificado desde la década de 1980**, con
-   mayor frecuencia de anomalías superiores a ±1.5°C en los 1990s y 2010s.
-2. Colombia se ve afectada en años de El Niño fuerte (1982–83, 1997–98, 2015–16)
-   con sequías, y en años de La Niña intensa (1999–2000, 2010–11) con inundaciones.
-3. El **El Niño 2015–16** registró la anomalía más alta del periodo histórico (+2.77°C).
-4. La **La Niña 2010–11** fue el episodio más devastador para Colombia por inundaciones,
-   con 3.2 millones de damnificados.
-5. Los meses de **septiembre a noviembre** son los más críticos para Colombia: el pico
-   estacional del ENSO coincide con la segunda temporada de lluvias del país.
-6. La correlación entre `Anomalia_C` y `ONI_C` es de r = 0.98, y entre `ONI_C` y
-   `Anomalia_12m` es de r = 0.96, confirmando la coherencia interna del dataset.
+1. El **ENOS tiene un impacto diferenciado** sobre la salud: El Niño aumenta los casos
+   de dengue (calor, menos lluvia favorecen al *Aedes aegypti*), mientras que La Niña
+   eleva los casos de leptospirosis y respiratorios por el exceso de humedad.
+2. La **La Niña 2010–11** fue el evento más devastador del periodo: en un solo mes se
+   superaron los 21,000 damnificados y la lluvia acumulada alcanzó niveles históricos.
+3. El **El Niño 2015–16** registró el índice ENOS más alto del periodo (+2.5°C),
+   con picos de dengue y temperatura por encima del promedio histórico.
+4. La lluvia sigue un **patrón bimodal** claramente amplificado por La Niña y reducido
+   por El Niño, consistente con el régimen de precipitaciones de Colombia.
+5. El dengue y los casos respiratorios tienen **estacionalidad inversa**: el dengue
+   sube con el calor (enero–mayo), los respiratorios con el frío y la humedad (mayo–agosto).
+6. Las correlaciones más relevantes: `ENOS_Indice` ↔ `Lluvia_Acumulada_mm` (negativa),
+   `ENOS_Indice` ↔ `Casos_Dengue` (positiva), `Lluvia` ↔ `Total_Afectados` (positiva).
 
 ---
 
-## Fase 3 — Inteligencia de Negocios: modelo de datos y dashboard 
+## Fase 3 — Inteligencia de Negocios: modelo de datos y dashboard
 
 
 
 ## Fase 4 — Modelado predictivo
-
 
 
